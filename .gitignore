@@ -2,6 +2,7 @@
 *.zip
 
 # Sicherungen und Arbeitsdateien
+veroeffentlichung_*.txt
 *.bak
 *_sicherung*
 *_backup*
