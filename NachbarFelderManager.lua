@@ -5,7 +5,7 @@ local print = NachbarFelderLog.print
 
 -- Steht beim loadMap im Log. Server und Clients werden getrennt bestückt,
 -- daran sieht man, ob beide denselben Stand fahren.
-NachbarFelderManager.BUILD = 182
+NachbarFelderManager.BUILD = 183
 
 local NachbarFelderManager_class = Class(NachbarFelderManager)
 
@@ -904,6 +904,23 @@ end
 -- loadMap: laeuft auf Server und Client (addModEventListener sitzt ---
 -- schon in init() von NachbarFelder.lua, daher auch auf dem Dedi)
 function NachbarFelderManager:loadMap()
+    -- Zweite Pruefung auf die alte ZIP (die erste steht beim Skript-Laden in
+    -- NachbarFelder.lua): hier ist die Mod-Liste sicher vollstaendig. Liegt
+    -- die alte Fassung noch im Mods-Ordner, bleibt diese hier stumm, damit
+    -- nicht beide Verkehr erzeugen und sich die Netzwerk-Events doppeln.
+    if NachbarFelderIstAlteModAktiv ~= nil and NachbarFelderIstAlteModAktiv() then
+        self.alteModAktiv = true
+        print("LivingRoads: WARNUNG - alte Mod-ZIP FS25_NachbarFelder aktiv, " ..
+            "diese Fassung bleibt aus (loadMap uebersprungen)")
+        if g_messageCenter ~= nil and MessageType ~= nil
+           and MessageType.OWN_PLAYER_ENTERED ~= nil
+           and NachbarFelderZeigeAlteZipMeldung ~= nil then
+            g_messageCenter:subscribeOneshot(MessageType.OWN_PLAYER_ENTERED,
+                NachbarFelderZeigeAlteZipMeldung, self)
+        end
+        return
+    end
+
     print("LivingRoads: loadMap auf " ..
         (g_currentMission:getIsServer() and "SERVER" or "CLIENT") ..
         " (Build " .. tostring(NachbarFelderManager.BUILD) .. ")")
@@ -1949,6 +1966,8 @@ end
 
 -- update: Telemetrie überall, Statusmaschine nur auf Server (oder SP) ---
 function NachbarFelderManager:update(dt)
+    -- alte ZIP FS25_NachbarFelder aktiv: diese Fassung bleibt komplett stumm
+    if self.alteModAktiv then return end
     -- Ruckler-Diagnose: auffaellig lange Frames zaehlen, auf Server und Client.
     -- Gemessen wird nur mit verbundenen Spielern: der Dedi drosselt im Leerlauf
     -- auf 5 Ticks/s (konstant 200 ms/Frame), das ist keine Last. Die Schwelle ist
@@ -5349,6 +5368,7 @@ end
 
 -- deleteMap / deleteAllVehicles beim Spielende ----------------------
 function NachbarFelderManager:deleteMap()
+    if self.alteModAktiv then return end
     if g_currentMission:getIsServer() then
         self:deleteAllVehicles("q")
     end

@@ -43,6 +43,38 @@ function NachbarFelderLesePfad(pfad)
     return pfad
 end
 
+-- Doppelte Installation: liegt neben dieser Mod noch die alte ZIP
+-- FS25_NachbarFelder im Mods-Ordner, wuerden beide Fassungen dieselben
+-- Klassen, Netzwerk-Events, Tasten und Konsolenbefehle anmelden und
+-- doppelten Verkehr erzeugen. Dann bleibt diese Fassung komplett aus und
+-- nur die alte laeuft weiter, bis die alte ZIP entfernt ist. Der Spieler
+-- bekommt zusaetzlich eine Meldung im Spiel (zweite Pruefung in loadMap,
+-- falls die Mod-Liste an dieser Stelle noch nicht vollstaendig ist).
+function NachbarFelderIstAlteModAktiv()
+    return g_modIsLoaded ~= nil and g_modIsLoaded[NF_ALTER_ORDNERNAME] == true
+end
+
+function NachbarFelderZeigeAlteZipMeldung()
+    if NachbarFelderAlteZipGemeldet then return end
+    if g_currentMission == nil or g_currentMission.addIngameNotification == nil then return end
+    NachbarFelderAlteZipGemeldet = true
+    local text = "Alte ZIP FS25_NachbarFelder entfernen - Lebendige Strassen startet nicht."
+    if g_i18n ~= nil and g_i18n.hasText ~= nil and g_i18n:hasText("NF_meldung_alteZip") then
+        text = g_i18n:getText("NF_meldung_alteZip")
+    end
+    g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_CRITICAL, text)
+end
+
+if NachbarFelderIstAlteModAktiv() then
+    print("LivingRoads: WARNUNG - die alte Mod-ZIP '" .. NF_ALTER_ORDNERNAME ..
+        "' ist noch im Mods-Ordner. Diese Fassung startet nicht; bitte die alte ZIP entfernen.")
+    if g_messageCenter ~= nil and MessageType ~= nil and MessageType.OWN_PLAYER_ENTERED ~= nil then
+        g_messageCenter:subscribeOneshot(MessageType.OWN_PLAYER_ENTERED,
+            NachbarFelderZeigeAlteZipMeldung, NachbarFelderLog)
+    end
+    return
+end
+
 -- Network-Events: Client an Server ----------------------------------
 NachbarFelderDeleteEvent = {}
 NachbarFelderDeleteEvent_mt = Class(NachbarFelderDeleteEvent, Event)
@@ -312,6 +344,11 @@ end
 local function addPlayerActionEvents(self, superFunc, ...)
     superFunc(self, ...)
 
+    -- alte ZIP aktiv: keine Tasten anmelden, die alte Fassung macht das selbst
+    if g_NachbarFelderManager ~= nil and g_NachbarFelderManager.alteModAktiv then
+        return
+    end
+
     -- Die Engine ruft das bei jedem Input-Kontextwechsel auf (Fahrzeug, Menüs),
     -- teils im Sekundentakt. Registriert wird jedes Mal, da der Kontext vorher
     -- geleert wird; geloggt nur beim ersten Aufruf.
@@ -417,6 +454,12 @@ end
 -- Läuft über OWN_PLAYER_ENTERED und baut nur die UI auf; die Spiellogik
 -- startet serverseitig in loadMap.
 local function initialize(nachbarFelder)
+    -- alte ZIP aktiv (in loadMap erkannt): keine UI aufbauen, nur die Meldung
+    if g_NachbarFelderManager ~= nil and g_NachbarFelderManager.alteModAktiv then
+        NachbarFelderZeigeAlteZipMeldung()
+        return
+    end
+
     local isAdmin = g_currentMission ~= nil and
         (g_currentMission:getIsServer() or g_currentMission.isMasterUser)
 

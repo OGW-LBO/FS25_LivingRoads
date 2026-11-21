@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="115">
+<modDesc descVersion="113">
     <author>OGW</author>
     <version>1.0.0.0</version>
     <title>
@@ -93,6 +93,11 @@ la touche se change dans Commandes.
             <en>Living Roads</en>
             <de>Lebendige Straßen</de>
             <fr>Routes Vivantes</fr>
+        </text>
+        <text name="NF_meldung_alteZip">
+            <en>The old mod ZIP FS25_NachbarFelder is still in the mods folder. Living Roads will not start - please remove the old ZIP.</en>
+            <de>Die alte Mod-ZIP FS25_NachbarFelder liegt noch im Mods-Ordner. Lebendige Straßen startet nicht - bitte die alte ZIP entfernen.</de>
+            <fr>L'ancien ZIP FS25_NachbarFelder se trouve encore dans le dossier mods. Routes Vivantes ne démarre pas - veuillez supprimer l'ancien ZIP.</fr>
         </text>
         <text name="NF_active_short">
             <en>Traffic active</en>

@@ -8,7 +8,11 @@ ab und fahren weiter. Die Mod läuft auf jeder Karte, im Einzelspieler, im Multi
 
 - Autor: OGW
 - modDesc-Version: `1.0.0.0` (`descVersion` 113)
-- Interner Stand: `NachbarFelderManager.BUILD = 182`, im Log als `LivingRoads: loadMap auf SERVER (Build 182)`
+- Interner Stand: `NachbarFelderManager.BUILD = 183`, im Log als `LivingRoads: loadMap auf SERVER (Build 183)`
+- Update von der alten ZIP `FS25_NachbarFelder.zip`: die alte ZIP aus dem Mods-Ordner entfernen.
+  Liegen beide ZIPs gleichzeitig dort, startet „Lebendige Straßen" nicht und meldet das im Spiel
+  und im Log (Zeile mit `WARNUNG - die alte Mod-ZIP`). Wegpunkte und Einstellungen werden beim
+  ersten Start automatisch aus dem alten `modSettings`-Ordner übernommen.
 
 Maßgeblich ist die Build-Nummer, nicht die modDesc-Version.
 
