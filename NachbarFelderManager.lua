@@ -5,7 +5,7 @@ local print = NachbarFelderLog.print
 
 -- Steht beim loadMap im Log. Server und Clients werden getrennt bestückt,
 -- daran sieht man, ob beide denselben Stand fahren.
-NachbarFelderManager.BUILD = 183
+NachbarFelderManager.BUILD = 184
 
 local NachbarFelderManager_class = Class(NachbarFelderManager)
 
@@ -959,6 +959,18 @@ function NachbarFelderManager:loadMap()
             self.savegameSettings = nil
             print("LivingRoads: [SETTINGS] Einstellungen aus dem Savegame angewendet")
         end
+        -- Strassenraster und Fahrzeug-/Geraetelisten noch im Ladebildschirm
+        -- aufbauen: im Singleplayer und beim lokalen Host gibt es nie einen
+        -- Leerlauf ohne Spieler, dort liefe der erste Aufbau (liest pro
+        -- Shop-Kandidat eine Fahrzeug-XML) sonst mitten im Spiel beim ersten
+        -- Spawn-Takt. Muss nach Konfig- und Savegame-Einstellungen laufen,
+        -- weil die Filter (Kategorien, enge Karte, Geraetegroesse) daraus
+        -- kommen. Sind die KI-Splines hier noch nicht bereit, setzt
+        -- buildRoadSamples nichts und der Leerlauf-Pfad in update() baut
+        -- spaeter wie bisher.
+        self:buildRoadSamples()
+        if self.trafficVehicleList == nil then self:buildTrafficVehicleList() end
+        if self.trafficTrailerList == nil then self:buildTrafficTrailerList() end
     end
 end
 
